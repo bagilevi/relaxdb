@@ -170,7 +170,7 @@ module RelaxDB
     
     alias_method :to_s, :inspect
             
-    def to_json
+    def to_json(options = nil)
       data = {}
       self.class.belongs_to_rels.each do |relationship, opts|
         id = instance_variable_get("@#{relationship}_id".to_sym)
@@ -181,7 +181,7 @@ module RelaxDB
         data["#{prop}"] = prop_val if prop_val
       end
       data["relaxdb_class"] = self.class.name
-      data.to_json      
+      options.nil? ? data.to_json : data.to_json(options)
     end
             
     # Not yet sure of final implemention for hooks - may lean more towards DM than AR
@@ -327,7 +327,7 @@ module RelaxDB
     
     # Returns true if CouchDB considers other to be the same as self
     def ==(other)
-      other && _id == other._id
+      other && other.respond_to?(:_id) && _id == other._id
     end
    
     # If you're using this method, read the specs and make sure you understand
