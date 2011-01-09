@@ -2,11 +2,12 @@ module RelaxDB
 
   class Server
       
-    def initialize(host, port, user = nil, pass = nil)
+    def initialize(host, port, user = nil, pass = nil, ssl = false)
       @host = host
       @port = port
       @user = user
       @pass = pass
+      @ssl = ssl
     end
 
     def delete(uri)
@@ -34,6 +35,7 @@ module RelaxDB
     def request(req)
       req.basic_auth @user, @pass if @user && @pass
       res = Net::HTTP.start(@host, @port) {|http|
+        http.use_ssl = true if @ssl
         http.request(req)
       }
       if (not res.kind_of?(Net::HTTPSuccess))
@@ -43,7 +45,7 @@ module RelaxDB
     end
   
     def to_s
-      "http://#{uri_login_prefix}#{@host}:#{@port}/"
+      "http#{"s" if @ssl}://#{uri_login_prefix}#{@host}:#{@port}/"
     end
 
     def uri_login_prefix
