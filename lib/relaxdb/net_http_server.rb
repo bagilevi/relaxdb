@@ -2,9 +2,11 @@ module RelaxDB
 
   class Server
       
-    def initialize(host, port)
+    def initialize(host, port, user = nil, pass = nil)
       @host = host
       @port = port
+      @user = user
+      @pass = pass
     end
 
     def delete(uri)
@@ -30,6 +32,7 @@ module RelaxDB
     end
 
     def request(req)
+      req.basic_auth @user, @pass if @user && @pass
       res = Net::HTTP.start(@host, @port) {|http|
         http.request(req)
       }
@@ -40,8 +43,15 @@ module RelaxDB
     end
   
     def to_s
-      "http://#{@host}:#{@port}/"
+      "http://#{uri_login_prefix}#{@host}:#{@port}/"
     end
+
+    def uri_login_prefix
+      if @user
+        "#{@user}#{":#{@pass}" if @pass}@"
+      end
+    end
+
   
     private
 
