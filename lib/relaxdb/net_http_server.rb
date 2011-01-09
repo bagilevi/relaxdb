@@ -34,10 +34,10 @@ module RelaxDB
 
     def request(req)
       req.basic_auth @user, @pass if @user && @pass
-      res = Net::HTTP.start(@host, @port) {|http|
-        http.use_ssl = true if @ssl
-        http.request(req)
-      }
+      http = Net::HTTP.new(@host, @port)
+      http.use_ssl = true if @ssl
+      http.start
+      res = http.request(req)
       if (not res.kind_of?(Net::HTTPSuccess))
         handle_error(req, res)
       end
